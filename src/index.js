@@ -1,5 +1,5 @@
 const express = require('express');
-const { uuid } = require('uuidv4');
+const { uuid, isUuid } = require('uuidv4');
 const app = express();
 
 app.use(express.json());
@@ -24,7 +24,35 @@ app.use(express.json());
  * 
  */
 
+/**
+ * Middleware:
+ * 
+ * Interceptador de requisiçoes que interrompe totalmente a requisicaçao ou alterarr dados da requisiçao.
+ * 
+ */
+
 const projects = [];
+
+function logRequests(req, resp, next){
+    const { method, url } = req;
+
+    const logLabel = `[${method.toUpperCase()}] ${url}`;
+
+    console.log(logLabel);
+
+    return next(); // Próximo middleware
+}
+
+function validateProjectId(req, resp, next){
+    const { id } = req.params;
+
+    if(!isUuid(id)) return resp.status(400).json({erro: 'Invalid project ID.'})
+
+    return next();
+}
+
+// app.use(logRequests);
+app.use('/projects/:id', validateProjectId);
 
 
 app.get('/projects', (req, resp) => { 
